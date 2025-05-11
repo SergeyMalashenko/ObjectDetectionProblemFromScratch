@@ -10,15 +10,17 @@ import torch
 import cv2
 import os
 
-#VOC_CLASSES = ('background','license_plate','car')
-VOC_CLASSES = ('background','car')
+VOC_CLASSES = ('background','license_plate','car')
+#VOC_CLASSES = ('background','car')
 
-IMAGE_RESOLUTION = (360,640)
+#IMAGE_RESOLUTION = (360,640)
+IMAGE_RESOLUTION = (720,1280)
 
 
 bbox_params = A.BboxParams(format='albumentations', min_area=100, min_visibility=0.5, label_fields=['labels'])
 
-light_transform = A.Compose([   
+light_transform = A.Compose([
+    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
     A.HorizontalFlip(p=0.5),
     A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
     A.GaussNoise(var_limit=(100, 150), p=0.5),
@@ -27,6 +29,7 @@ light_transform = A.Compose([
 ], bbox_params=bbox_params,  p=1.0)
 
 medium_transform = A.Compose([
+    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
     A.HorizontalFlip(p=0.5),
     A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
     A.MotionBlur(blur_limit=17, p=0.5),
@@ -35,6 +38,7 @@ medium_transform = A.Compose([
 ], bbox_params=bbox_params, p=1.0)
 
 strong_transform = A.Compose([
+    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
     A.HorizontalFlip(p=0.5),
     A.RandomResizedCrop(IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
     A.RGBShift(p=0.5),
