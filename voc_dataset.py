@@ -24,7 +24,7 @@ light_transform = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
     A.GaussNoise(var_limit=(100, 150), p=0.5),
-    A.augmentations.transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params,  p=1.0)
 
@@ -33,7 +33,7 @@ medium_transform = A.Compose([
     A.HorizontalFlip(p=0.5),
     A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
     A.MotionBlur(blur_limit=17, p=0.5),
-    A.augmentations.transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params, p=1.0)
 
@@ -45,12 +45,12 @@ strong_transform = A.Compose([
     A.Blur(blur_limit=11, p=0.5),
     A.RandomBrightnessContrast(p=0.5),
     A.CLAHE(p=0.5),
-    A.augmentations.transforms.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params, p=1.0)
 
 class VOCDetection(data.Dataset):
-    def __init__(self, voc_root, annotation_filename, sample_transform=light_transform):
+    def __init__(self, voc_root, annotation_filename, sample_transform=strong_transform):
         self.annotation_filename = annotation_filename
         self.sample_transform    = sample_transform
         self.root                = voc_root  
