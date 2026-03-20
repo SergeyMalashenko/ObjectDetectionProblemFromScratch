@@ -10,47 +10,40 @@ import torch
 import cv2
 import os
 
-VOC_CLASSES = ('background','license_plate','car')
-#VOC_CLASSES = ('background','car')
-
-#IMAGE_RESOLUTION = (360,640)
-IMAGE_RESOLUTION = (720,1280)
-
+#VOC_CLASSES = ('background','license_plate','car')
+VOC_CLASSES = ('background','car')
 
 bbox_params = A.BboxParams(format='albumentations', min_area=100, min_visibility=0.5, label_fields=['labels'])
 
-light_transform = A.Compose([
-    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
+light_transform = A.Compose([   
     A.HorizontalFlip(p=0.5),
-    A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
-    A.GaussNoise(var_limit=(100, 150), p=0.5),
-    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.RandomResizedCrop(size=(360,640), p=0.5, scale=(0.7, 1.0)),
+    A.GaussNoise(p=0.5),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params,  p=1.0)
 
 medium_transform = A.Compose([
-    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
     A.HorizontalFlip(p=0.5),
-    A.RandomResizedCrop(size=IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
+    A.RandomResizedCrop(size=(360,640), p=0.5, scale=(0.7, 1.0)),
     A.MotionBlur(blur_limit=17, p=0.5),
-    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params, p=1.0)
 
 strong_transform = A.Compose([
-    A.Resize(height=IMAGE_RESOLUTION[0], width=IMAGE_RESOLUTION[1], p=1.0),
     A.HorizontalFlip(p=0.5),
-    A.RandomResizedCrop(IMAGE_RESOLUTION, p=0.5, scale=(0.7, 1.0)),
+    A.RandomResizedCrop(size=(360,640), p=0.5, scale=(0.7, 1.0)),
     A.RGBShift(p=0.5),
     A.Blur(blur_limit=11, p=0.5),
     A.RandomBrightnessContrast(p=0.5),
     A.CLAHE(p=0.5),
-    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225), always_apply=True),
+    A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
     A.pytorch.transforms.ToTensorV2()
 ], bbox_params=bbox_params, p=1.0)
 
 class VOCDetection(data.Dataset):
-    def __init__(self, voc_root, annotation_filename, sample_transform=strong_transform):
+    def __init__(self, voc_root, annotation_filename, sample_transform=light_transform):
         self.annotation_filename = annotation_filename
         self.sample_transform    = sample_transform
         self.root                = voc_root  
@@ -109,7 +102,9 @@ class VOCDetection(data.Dataset):
         #target_box_s   = source_box_s
         #target_label_s = source_label_s
         
-        return torch.tensor(target_image), torch.from_numpy(target_box_s), torch.from_numpy(target_label_s)
+        return target_image.detach().clone(), \
+               torch.from_numpy(target_box_s  ).detach().clone(), \
+               torch.from_numpy(target_label_s).detach().clone()
     
     def __len__(self):
         return len(self.id_s)
